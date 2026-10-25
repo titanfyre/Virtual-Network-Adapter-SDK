@@ -1,38 +1,47 @@
 # Validation and deployment boundaries
 
-This document records bounded checks for the first Virtual Network Adapter SDK preview. The private driver requires a verified Microsoft-signed return before the public bundle includes installable driver executables.
+Application/SDK 0.1.1 includes Microsoft-signed driver 0.1.0.0. The returned INF and Authenticode-protected SYS image match the submission. Microsoft catalog trust, INF/SYS membership and the exact embedded installer resources pass. Signing and bounded VM tests do not establish universal deployment qualification.
 
-| Check | Status |
+| Check | Result |
 | --- | --- |
-| Native application, SDK, console example and UI/console installer source | Built with MSVC `/W4 /WX`, CFG and static runtime |
-| Frame parser bounds, malformed hex, minimum/maximum frame size and 10,000 deterministic randomized round trips | 40,014 assertions passed |
-| Same user-mode assertions under AddressSanitizer | Passed with MSVC 14.44 runtime |
+| Native application, SDK, CLI, example and UI/console setup | Built with MSVC `/W4 /WX`, CFG, ASLR, NX and static runtime |
+| Frame parser bounds, malformed hex, minimum/maximum frames and deterministic randomized round trips | 40,014 assertions passed |
+| Installer class/provider/hardware/model/service/copy-file identity and unsigned-signature refusal | 12 checks passed |
+| Both user-mode CTest cases under AddressSanitizer | Passed with MSVC 14.44 runtime |
+| Returned signed package policy | 17 read-only checks: exact identity, Microsoft-root catalog and INF/SYS membership accepted; altered INF/SYS/catalog fixtures refused |
+| Embedded UI/console installer payloads | Exact returned INF/CAT/SYS bytes, inspected as data without executing installer code on the host |
 | Private NDIS miniport PREfast | Zero reported defects |
 | INF Windows Driver / universal validation | `InfVerif /w` and `/u` passed |
-| Windows 10/11 x64 catalog generation | Passed |
-| CAB expansion and payload hash comparison | Passed |
-| Windows 10 build 19045 x64, current driver candidate, normal VM campaign | Passed: actual installation, at least 2,141 checks, real UDP round trip, 1,024 receive indications and own-package uninstallation |
-| Live owner removal and replacement with four concurrent observer threads | Passed normally and under Driver Verifier: at least 2,141 checks, replacement PnP code 0, fresh endpoint query, old endpoint STATUS/CONNECT refusal and handle cleanup |
-| Restricted non-administrator control-device open | Denied as expected in the VM |
-| Current candidate with targeted Driver Verifier | Passed: normal packet/control run and live-owner removal/replacement run, with real UDP delivery and full own-package unload |
-| Microsoft-signed package installation and broad deployment | Pending signed return |
+| Windows 10/11 x64 catalog generation and CAB round trip | Passed before submission; this is not a Windows 11 runtime result |
+| Microsoft-signed package on Windows 10 build 19045 x64, normal campaign | Passed: real console installation, 2,144 packet/control checks and 2,144 live-owner removal/replacement checks |
+| Same signed package under standard Driver Verifier targeted at both new SDK drivers | Passed: 2,145 packet/control checks and 2,147 live-owner removal/replacement checks |
+| Restricted non-administrator control-device open | Denied in both signed VM campaigns |
+| Actual signed console uninstallation, package removal and driver unload | Passed in both signed VM campaigns |
 
-Both final VM campaigns used the candidate with SHA-256 `13A59130D7397FEFB36CDC752944181086DBBB46ECAC7EEFA47C320B6CA80352`. They used isolated lab-signed copies, not a returned Microsoft signature. The normal packet/control run completed 2,141 checks and its live-owner run completed 2,145; with targeted Driver Verifier, both runs completed 2,142 checks. Counts vary slightly with Windows background frames and ARP timing. The baseline and all nine historical checkpoints were restored after each campaign; the VM ended off. The own driver package unloaded without a restart after all old handles closed. No driver was installed on the host and no host networking or security policy was changed. The UI's 200 ms refresh rate is not a driver throughput or latency measurement. Advertised 1 Gbit/s link speed is a software interface property.
+Both final campaigns used the exact returned signed SYS with SHA-256 `21645fc20733f3ce5fb0b17bf55fc5dd2beb84437d167ec41637b20fd8dc896b`; its installed Driver Store hash was checked. Test-signing was disabled, no guest test certificate was used, and the bundled console installers performed installation and full own-package removal. The UI and console share the installation core, but UI resource/core checks are distinct from live console operation tests.
+
+The normal and Driver Verifier campaigns both restored the original powered-off VM baseline and all nine historical checkpoints. Neither produced a new minidump. No driver was installed on the host, and no host networking or security policy was changed. Earlier pre-submission lab-signed candidate tests remain separate private evidence rather than being counted as signed-return tests.
 
 ## Runtime checks
 
-The isolated VM runtime opens only the administrator control endpoint, verifies that an unsigned permission cannot connect the link, obtains a fresh handle-bound challenge and accepts only a correctly signed permission. Replay, foreign-owner queue reads and foreign disconnects must fail. The driver starts disconnected.
+The isolated runtime opens only the administrator control endpoint. It verifies that an unsigned permission cannot connect the link, obtains a fresh handle-bound challenge and accepts only a correctly signed permission. Replay, foreign-owner queue reads and foreign disconnects are refused. The driver starts disconnected.
 
-For actual data delivery, the runtime assigns a temporary RFC 5737 address to the one synthetic MAC, sends a UDP datagram from Windows to a synthetic peer, responds to ARP inside the SDK, verifies the outbound UDP payload and supplies a constructed Ethernet/IPv4/UDP response. A Windows UDP socket receives the exact response. The runtime then performs 1,024 bounded private EtherType receive indications, disconnects, reconnects and verifies owner-handle close cleanup. It verifies removal of its temporary address and leaves physical interfaces, DNS and gateways unchanged.
+For actual delivery, the runtime assigns a temporary RFC 5737 address to the one synthetic MAC, sends a UDP datagram from Windows to a synthetic peer, responds to ARP inside the SDK, verifies the outbound UDP payload and supplies a constructed Ethernet/IPv4/UDP response. A Windows UDP socket receives the exact response. Each packet/control run and each live-owner run includes 1,024 bounded private EtherType receive indications, disconnect/reconnect and owner-handle close cleanup. The runtime removes its temporary address and leaves physical interfaces, DNS and gateways unchanged. Check counts vary slightly with background frames and ARP timing.
 
-The live-removal campaign keeps the authorized owner and an observer handle open while four threads query the observer endpoint. It removes the own PnP node, closes the old owner and re-enumerates the adapter while the old observer remains open. The replacement reaches PnP problem code 0, and the console SDK queries the new disconnected endpoint before and after the old observer closes. STATUS and CONNECT requests on the old observer are refused; closing it allows the old control object to finish deletion. The driver uses unique kernel device names with a stable public link and compares each request's device object with the current generation. The test then removes only its own package and verifies driver unload.
+The live-removal case keeps the authorized owner and an observer handle open while four threads query the observer endpoint. It removes the own PnP node, closes the old owner and reinstalls the signed adapter while the old observer remains open. The replacement reaches PnP problem code 0. The shipping console SDK queries its fresh disconnected endpoint before and after the old observer closes. STATUS and CONNECT requests on the old observer are refused; closing it allows the old control object to finish deletion. The test then removes the own package and verifies driver unload.
 
-Windows exposes NDIS filter interfaces in `GetIfTable2`, often sharing the base adapter's MAC address. The test selects an exact current/permanent synthetic MAC with `InterfaceAndOperStatusFlags.FilterInterface == FALSE`; it never selects a physical interface or chooses an interface by its display name alone. Enumeration is bounded and interface-selection metadata is retained privately for diagnostics.
+Windows exposes NDIS filter interfaces in `GetIfTable2`, often sharing the base adapter's MAC. The runtime selects the exact current/permanent synthetic MAC with `InterfaceAndOperStatusFlags.FilterInterface == FALSE`; it never selects a physical interface or chooses an interface by its display name alone. Enumeration is bounded.
+
+## Signed installer boundary
+
+Both setups embed the exact returned INF/CAT/SYS. Catalog verification requires a trusted chain to a Microsoft root, the Microsoft Windows Hardware Compatibility Publisher common name and Microsoft organization, followed by catalog membership for the actual INF and SYS. Identity checks require this product's class, provider, hardware ID, model, service and copy-file/directory identity. Tests of altered files do not install a driver on the host.
+
+A source-only build contains no package by default and says so in setup. Supply a separately verified opaque signed package at build time to produce installable setups. Neither setup changes signature enforcement, enables test-signing, restarts automatically, changes a physical adapter or installs routes, gateways, bridges or DNS configuration. Exit code 3010 requests a manual restart; no restart was needed in the completed signed campaigns.
 
 ## Remaining limits
 
-Initial qualification targets Windows 10 build 19045 x64. Windows 11, suspend/resume, many-instance churn, long-duration workloads, Hyper-V/third-party network-filter combinations, installer update/rollback, hardware performance and Microsoft-signed-package installation need separate qualification. No claim of zero latency, zero defects, unlimited throughput or unbreakable licensing is made.
+Qualification currently covers Windows 10 build 19045 x64 in an isolated Hyper-V guest. Windows 11, Secure Boot/HVCI, suspend/resume, long-duration workloads, many-instance churn, Hyper-V/third-party filter coexistence, installer update/rollback and hardware performance require separate testing. No claim of zero latency, zero defects, unlimited throughput or unbreakable licensing is made. The UI's 200 ms display refresh is not a data-path rate limit; the advertised 1 Gbit/s software link speed is not a benchmark.
 
-Only Ethernet frames are accepted. The interface exposes no arbitrary memory access, kernel address operations or physical adapter capture. One owner controls one fixed adapter; application-side scheduling and protocol implementation remain the integrator's responsibility. Server authorization is a bounded lease: administrative key revocation prevents new grants, while an existing grant remains effective until its lifetime ends. Sharing an access key remains possible without machine binding.
+Only Ethernet frames are accepted. The interface exposes no arbitrary memory access, kernel address operations or physical adapter capture. One owner controls one fixed adapter. Application scheduling, Ethernet protocols, address configuration and any tunnel transport remain the integrator's responsibility.
 
-Lease expiration blocks packet exchange immediately. The next passive control operation clears ownership, flushes stale queued frames and reports link departure before a renewal is accepted. An otherwise idle adapter's asynchronous Windows link notification is deferred until that control operation; there is no periodic expiry polling timer.
+Authorization is a bounded lease: key revocation prevents new grants, while an issued grant remains effective until expiry. Keys can be shared; this build has no machine binding. Lease expiration blocks packet exchange immediately. The next passive control operation clears ownership, flushes queued frames and reports link departure before a renewal is accepted. An otherwise idle adapter's Windows link notification is deferred until that operation; there is no periodic expiry polling timer.

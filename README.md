@@ -6,22 +6,22 @@ Build a software network endpoint for protocol laboratories, network simulators,
 
 ![Application interface in offline preview mode](docs/app.png)
 
-**Status: SDK/application preview.** The private NDIS driver is being prepared for Microsoft signing. The public preview contains user-mode sources and tools; working signed driver installers will be included after the signed return is verified. Do not change Windows signature-enforcement settings to run this preview.
+**Microsoft-signed Windows x64 evaluation bundle.** Application 0.1.1 includes the verified Microsoft-signed NDIS driver 0.1.0.0, self-contained UI/console installers, native app, CLI, compact C++ SDK and example sources. No change to Windows signature-enforcement settings is required. Signing does not establish production qualification; see [validation](docs/VALIDATION.md).
 
 ## Use the adapter
 
 1. Download the complete Windows x64 bundle from [Releases](https://github.com/titanfyre/Virtual-Network-Adapter-SDK/releases).
-2. Once the signed driver bundle is available, run `NetworkAdapterSetup.exe` and select **Install / reinstall**. Administrator elevation is required. Restart only if Windows requests it.
+2. Extract the ZIP, run `NetworkAdapterSetup.exe` and select **Install / reinstall**. Administrator elevation is required. Restart only if Windows requests it.
 3. Open `TitanVirtualNetwork.exe`, enter the application access key supplied for your evaluation or OEM integration and choose **Authorize & connect**.
 4. The virtual link is now available to Windows. Inspect its counters and pass frames through your application. Closing the owning application disconnects the link.
 
 The adapter starts disconnected. Installation and the example application leave physical network adapters, DNS, gateways and bridges unchanged. Assign addressing and implement your application protocol for your own deployment. The UI refreshes counters every 200 ms; this display interval does not rate-limit the driver data path.
 
-The console tool supports `NetworkAdapterCLI.exe status` and `NetworkAdapterCLI.exe connect`. Uninstall with the UI or `NetworkAdapterSetupConsole.exe /uninstall`. Console installation uses `/install`; exit code `3010` means Windows requires a restart. Both setup executables embed the driver package and verify its exact identity, Microsoft publisher signature and INF/SYS catalog membership before installation.
+The console tool supports `NetworkAdapterCLI.exe status` and `NetworkAdapterCLI.exe connect`. Uninstall with the UI or `NetworkAdapterSetupConsole.exe /uninstall`. Console installation uses `/install`; exit code `3010` means Windows requires a restart. Both setup executables embed the driver package and verify its exact identity, trusted Microsoft-root hardware-publisher catalog and INF/SYS catalog membership before installation.
 
 ## Minimal C++ integration
 
-Compile `SDK/NetworkAdapter.cpp` with your application and link `winhttp.lib` and `crypt32.lib`.
+Keep the complete `SDK/` directory (including its protocol headers), compile `SDK/NetworkAdapter.cpp` with your application and link `setupapi.lib`, `winhttp.lib` and `crypt32.lib`.
 
 ```cpp
 #include "SDK/NetworkAdapter.h"
@@ -63,11 +63,13 @@ Windows x64, Visual Studio 2022 C++ desktop tools, CMake 3.20+ and the Windows S
 ```powershell
 .\Build.ps1
 .\Build.ps1 -Asan
+# Optional: embed a separately received opaque Microsoft-signed package.
+.\Build.ps1 -DriverPackageDirectory C:\Signed\TitanVirtualNetwork
 ```
 
 Outputs are in `obj/Build/bin/Release`. Without an opaque signed driver package, compiled setup tools contain no installable driver payload. An authorized packager can set `-DDRIVER_PACKAGE_DIRECTORY="C:/Signed/TitanVirtualNetwork"` when configuring CMake to embed the matching INF/CAT/SYS files. Setup retains its signature and membership checks.
 
-The native application/SDK and installer sources compile with MSVC `/W4 /WX`, CFG and a static runtime. The frame parser passes 40,014 bounded-input and deterministic randomized assertions normally and under AddressSanitizer. The private miniport builds with PREfast reporting zero defects; InfVerif `/w` and `/u` and Windows 10/11 x64 catalog generation pass. The current candidate passed isolated Windows 10 installation, at least 2,141 checks per run, a real Windows UDP round trip through the virtual adapter and 1,024 receive indications, normally and with targeted Driver Verifier. Live-owner tests verified removal and replacement while old handles remained open, rejection of those old handles, restricted non-administrator access refusal and complete package unload without a restart. These VM checks used private lab-signed copies; Microsoft-signed-package installation remains pending. See [validation](docs/VALIDATION.md) for exact scope and limits.
+The native application/SDK and installer sources compile with MSVC `/W4 /WX`, CFG and a static runtime. The frame parser passes 40,014 bounded-input and deterministic randomized assertions. Twelve installer identity/signature-refusal checks pass; both CTest cases also pass under AddressSanitizer. Seventeen additional read-only checks accept the returned Microsoft catalog and exact INF/SYS members, then reject altered files. Embedded installer resources exactly match the signed return. The complete signed console installation/runtime/removal campaign passes on Windows 10 build 19045 x64, normally and under targeted Driver Verifier, with test-signing disabled. It includes real Windows UDP delivery, 1,024 receive indications, live-owner removal/replacement and stale-generation rejection. See [validation](docs/VALIDATION.md) for the evidence and remaining deployment limits. The private kernel source is not included in the public repository.
 
 ## Architecture and scope
 

@@ -30,7 +30,20 @@ bool MicrosoftCatalog(const fs::path& path){
     WINTRUST_FILE_INFO file{};file.cbStruct=sizeof(file);file.pcwszFilePath=path.c_str();
     WINTRUST_DATA data{};data.cbStruct=sizeof(data);data.dwUIChoice=WTD_UI_NONE;data.fdwRevocationChecks=WTD_REVOKE_NONE;data.dwUnionChoice=WTD_CHOICE_FILE;data.pFile=&file;data.dwStateAction=WTD_STATEACTION_VERIFY;data.dwProvFlags=WTD_CACHE_ONLY_URL_RETRIEVAL;
     GUID action=WINTRUST_ACTION_GENERIC_VERIFY_V2;LONG status=WinVerifyTrust(nullptr,&action,&data);bool accepted=false;
-    if(status==ERROR_SUCCESS){auto provider=WTHelperProvDataFromStateData(data.hWVTStateData);auto signer=provider?WTHelperGetProvSignerFromChain(provider,0,FALSE,0):nullptr;if(signer&&signer->csCertChain){wchar_t name[512]{};CertGetNameStringW(signer->pasCertChain[0].pCert,CERT_NAME_SIMPLE_DISPLAY_TYPE,0,nullptr,name,512);accepted=_wcsicmp(name,L"Microsoft Windows Hardware Compatibility Publisher")==0;}}
+    if(status==ERROR_SUCCESS){
+        auto provider=WTHelperProvDataFromStateData(data.hWVTStateData);
+        auto signer=provider?WTHelperGetProvSignerFromChain(provider,0,FALSE,0):nullptr;
+        if(signer&&signer->csCertChain&&signer->pChainContext){
+            wchar_t name[256]{},organization[256]{};auto certificate=signer->pasCertChain[0].pCert;
+            CertGetNameStringW(certificate,CERT_NAME_ATTR_TYPE,0,const_cast<char*>(szOID_COMMON_NAME),name,256);
+            CertGetNameStringW(certificate,CERT_NAME_ATTR_TYPE,0,const_cast<char*>(szOID_ORGANIZATION_NAME),organization,256);
+            CERT_CHAIN_POLICY_PARA policy{};policy.cbSize=sizeof(policy);
+            CERT_CHAIN_POLICY_STATUS verdict{};verdict.cbSize=sizeof(verdict);
+            bool microsoftRoot=CertVerifyCertificateChainPolicy(CERT_CHAIN_POLICY_MICROSOFT_ROOT,signer->pChainContext,&policy,&verdict)&&verdict.dwError==ERROR_SUCCESS;
+            if(!microsoftRoot){policy.dwFlags=MICROSOFT_ROOT_CERT_CHAIN_POLICY_CHECK_APPLICATION_ROOT_FLAG;verdict.dwError=ERROR_SUCCESS;microsoftRoot=CertVerifyCertificateChainPolicy(CERT_CHAIN_POLICY_MICROSOFT_ROOT,signer->pChainContext,&policy,&verdict)&&verdict.dwError==ERROR_SUCCESS;}
+            accepted=microsoftRoot&&!_wcsicmp(name,L"Microsoft Windows Hardware Compatibility Publisher")&&!_wcsicmp(organization,L"Microsoft Corporation");
+        }
+    }
     data.dwStateAction=WTD_STATEACTION_CLOSE;WinVerifyTrust(nullptr,&action,&data);return accepted;
 }
 bool CatalogMember(const fs::path& directory,const wchar_t* name){
@@ -51,12 +64,15 @@ bool OwnPackage(const fs::path& path){
     if(!SetupDiGetINFClassW(path.c_str(),&classId,className,128,nullptr)||!IsEqualGUID(classId,GUID_DEVCLASS_NET))return false;
     HINF inf=SetupOpenInfFileW(path.c_str(),nullptr,INF_STYLE_WIN4,nullptr);if(inf==INVALID_HANDLE_VALUE)return false;
     struct Inf{HINF h;~Inf(){SetupCloseInfFile(h);}} file{inf};INFCONTEXT line{};wchar_t value[512]{};
+    if(!SetupFindFirstLineW(inf,L"Version",L"Class",&line)||!SetupGetStringFieldW(&line,1,value,512,nullptr)||_wcsicmp(value,L"Net"))return false;
     if(!SetupFindFirstLineW(inf,L"Version",L"CatalogFile",&line)||!SetupGetStringFieldW(&line,1,value,512,nullptr)||_wcsicmp(value,L"TitanVirtualNetwork.cat"))return false;
     if(!SetupFindFirstLineW(inf,L"Version",L"Provider",&line)||!SetupGetStringFieldW(&line,1,value,512,nullptr)||_wcsicmp(value,L"Titanfyre"))return false;
-    if(!SetupFindFirstLineW(inf,L"Models.NTamd64.10.0...19041",nullptr,&line))return false;
-    unsigned rows=0;
-    do{if(++rows>32)return false;if(SetupGetStringFieldW(&line,2,value,512,nullptr)&&_wcsicmp(value,Hardware)==0)return true;}while(SetupFindNextLine(&line,&line));
-    return false;
+    if(SetupGetLineCountW(inf,L"Models.NTamd64.10.0...19041")!=1||!SetupFindFirstLineW(inf,L"Models.NTamd64.10.0...19041",nullptr,&line))return false;
+    if(!SetupGetStringFieldW(&line,1,value,512,nullptr)||_wcsicmp(value,L"Install")||!SetupGetStringFieldW(&line,2,value,512,nullptr)||_wcsicmp(value,Hardware))return false;
+    if(SetupGetLineCountW(inf,L"Install.NT.Services")!=1||!SetupFindFirstLineW(inf,L"Install.NT.Services",L"AddService",&line)||!SetupGetStringFieldW(&line,1,value,512,nullptr)||_wcsicmp(value,L"TitanVirtualNetwork"))return false;
+    if(!SetupFindFirstLineW(inf,L"Install.NT",L"CopyFiles",&line)||!SetupGetStringFieldW(&line,1,value,512,nullptr)||_wcsicmp(value,L"CopyDriver"))return false;
+    if(SetupGetLineCountW(inf,L"CopyDriver")!=1||!SetupFindFirstLineW(inf,L"CopyDriver",nullptr,&line)||!SetupGetStringFieldW(&line,1,value,512,nullptr)||_wcsicmp(value,L"TitanVirtualNetwork.sys"))return false;
+    int directory=0;return SetupFindFirstLineW(inf,L"DestinationDirs",L"CopyDriver",&line)&&SetupGetIntField(&line,1,&directory)&&directory==13;
 }
 struct Temporary {
     fs::path directory;
@@ -79,7 +95,7 @@ struct Temporary {
 Setup::Result Install(){
     Temporary temp;temp.Create();
     if(!OwnPackage(temp.directory/L"TitanVirtualNetwork.inf"))return {ERROR_INVALID_DATA,false,L"Installation refused: the embedded package does not match the exact Titan virtual adapter identity."};
-    if(!MicrosoftCatalog(temp.directory/L"TitanVirtualNetwork.cat"))return {ERROR_INVALID_IMAGE_HASH,false,L"Installation refused: the embedded driver catalog must have a trusted Microsoft Windows Hardware Compatibility Publisher signature. This preview has not completed Microsoft signing."};
+    if(!MicrosoftCatalog(temp.directory/L"TitanVirtualNetwork.cat"))return {ERROR_INVALID_IMAGE_HASH,false,L"Installation refused: the embedded driver catalog must have a trusted Microsoft Windows Hardware Compatibility Publisher signature. Unsigned, test-signed and untrusted catalogs are refused."};
     if(!CatalogMember(temp.directory,L"TitanVirtualNetwork.inf")||!CatalogMember(temp.directory,L"TitanVirtualNetwork.sys"))return {ERROR_INVALID_IMAGE_HASH,false,L"Installation refused: the embedded INF or SYS is not a trusted member of its catalog."};
     Devices devices;devices.h=SetupDiGetClassDevsW(&GUID_DEVCLASS_NET,nullptr,nullptr,0);Require(devices.h!=INVALID_HANDLE_VALUE);
     SP_DEVINFO_DATA selected{};selected.cbSize=sizeof(selected);bool found=false;

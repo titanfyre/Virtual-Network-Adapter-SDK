@@ -1,7 +1,9 @@
-param([switch]$Asan)
+param([switch]$Asan,[string]$DriverPackageDirectory)
 $ErrorActionPreference='Stop'
 $build=Join-Path $PSScriptRoot $(if($Asan){'obj/Asan'}else{'obj/Build'})
-cmake -S $PSScriptRoot -B $build -G 'Visual Studio 17 2022' -A x64 "-DTRACE_ASAN=$([int]$Asan.IsPresent)"
+$packageOptions=@()
+if($DriverPackageDirectory){$packageOptions=@("-DDRIVER_PACKAGE_DIRECTORY=$([IO.Path]::GetFullPath($DriverPackageDirectory))")}
+cmake -S $PSScriptRoot -B $build -G 'Visual Studio 17 2022' -A x64 "-DTRACE_ASAN=$([int]$Asan.IsPresent)" @packageOptions
 if($LASTEXITCODE){throw 'Configuration failed'}
 $buildOptions=@()
 if($Asan){
