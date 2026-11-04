@@ -65,9 +65,15 @@ Packet access stops as soon as the permission expires. The next passive control 
 
 Keys can be revoked in the common administration portal; revocation prevents new permissions after already-issued permissions expire. Keys are bearer credentials: recipients can share them, and this version does not bind a key to a machine or enforce a per-machine seat limit. A local administrator, compromised kernel or an authorized application acting as a relay remains outside any promise of unbreakable licensing. Applications should protect their access keys and handle renewal failures explicitly.
 
-For an evaluation, an OEM redistribution agreement, application integration or deployment support, add **`titancsa` on Discord**. Send your Windows versions, expected deployment count and intended Ethernet protocol. Public application/SDK source is MIT; the private driver has separate evaluation/OEM distribution terms. Availability of a Microsoft signature does not establish WHQL certification or Microsoft endorsement.
+For an evaluation, an OEM redistribution agreement, application integration or deployment support, add **`titancsa` on Discord**. Send your Windows versions, expected deployment count and intended Ethernet protocol. Public application/SDK source is MIT; the prebuilt driver has separate evaluation/OEM distribution terms. Availability of a Microsoft signature does not establish WHQL certification or Microsoft endorsement.
 
 ## Build and validation
+
+Demo/evaluation driver source is available; see [driver/README.md](driver/README.md) for
+build instructions and separate evaluation-source terms. Those terms apply to
+Titan-authored driver code. Third-party source licenses and existing application/SDK
+licenses remain applicable. Full/commercial implementation and private signing or
+activation material are excluded.
 
 Windows x64, Visual Studio 2022 C++ desktop tools, CMake 3.20+ and the Windows SDK:
 
@@ -80,7 +86,7 @@ Windows x64, Visual Studio 2022 C++ desktop tools, CMake 3.20+ and the Windows S
 
 Outputs are in `obj/Build/bin/Release`. Without an opaque signed driver package, compiled setup tools contain no installable driver payload. An authorized packager can set `-DDRIVER_PACKAGE_DIRECTORY="C:/Signed/TitanVirtualNetwork"` when configuring CMake to embed the matching INF/CAT/SYS files. Setup retains its signature and membership checks.
 
-The native application/SDK and installer sources compile with MSVC `/W4 /WX`, CFG and a static runtime. The frame parser passes 40,014 bounded-input and deterministic randomized assertions. Twelve installer identity/signature-refusal checks pass; both CTest cases also pass under AddressSanitizer. Seventeen additional read-only checks accept the returned Microsoft catalog and exact INF/SYS members, then reject altered files. Embedded installer resources exactly match the signed return. The complete signed console installation/runtime/removal campaign passes on Windows 10 build 19045 x64, normally and under targeted Driver Verifier, with test-signing disabled. It includes real Windows UDP delivery, 1,024 receive indications, live-owner removal/replacement and stale-generation rejection. See [validation](docs/VALIDATION.md) for the evidence and remaining deployment limits. The private kernel source is not included in the public repository.
+The native application/SDK and installer sources compile with MSVC `/W4 /WX`, CFG and a static runtime. The frame parser passes 40,014 bounded-input and deterministic randomized assertions. Twelve installer identity/signature-refusal checks pass; both CTest cases also pass under AddressSanitizer. Seventeen additional read-only checks accept the returned Microsoft catalog and exact INF/SYS members, then reject altered files. Embedded installer resources exactly match the signed return. The complete signed console installation/runtime/removal campaign passes on Windows 10 build 19045 x64, normally and under targeted Driver Verifier, with test-signing disabled. It includes real Windows UDP delivery, 1,024 receive indications, live-owner removal/replacement and stale-generation rejection. See [validation](docs/VALIDATION.md) for the evidence and remaining deployment limits. Evaluation driver source and its source-license notes are documented in [driver/README.md](driver/README.md).
 
 ## Architecture and scope
 
