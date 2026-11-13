@@ -11,7 +11,7 @@ Current source layout and registry coverage. A GitHub download is distinct from 
 | Python/pypi | built_fixture_and_production_verified | virtual-network-adapter-sdk [Source](Virtual-Network-Adapter-SDK-Python-pypi/) |
 | Python/conda-forge | custom_channel_install_verified_requires_conda_forge_review | [virtual-network-adapter-sdk](https://raw.githubusercontent.com/TitanCSA/sdk-packages/089bc73095aa8eda89bacbe10d0b9e58394b0207/conda-channel) [Source](packaging/conda/) |
 | Rust/cargo | published_install_verified | [virtual-network-adapter-sdk](https://crates.io/crates/virtual-network-adapter-sdk) [Source](Virtual-Network-Adapter-SDK-Rust-cargo/) |
-| JavaScript/npm | awaiting_browser_publication_authentication | [virtual-network-adapter-sdk](https://www.npmjs.com/package/virtual-network-adapter-sdk) [Source](Virtual-Network-Adapter-SDK-JavaScript-npm/) |
+| JavaScript/npm | registry_publication_requires_action | [virtual-network-adapter-sdk](https://www.npmjs.com/package/virtual-network-adapter-sdk) [Source](Virtual-Network-Adapter-SDK-JavaScript-npm/) |
 | Java/maven | published_install_verified | [virtual-network-adapter-sdk](https://central.sonatype.com/artifact/io.github.titancsa/virtual-network-adapter-sdk/1.0.0) [Source](Virtual-Network-Adapter-SDK-Java-maven/) |
 | Java/jitpack | published_install_verified | [virtual-network-adapter-sdk](https://jitpack.io/#titanfyre/Virtual-Network-Adapter-SDK/java-sdk-v1.0.0) [Source](Virtual-Network-Adapter-SDK-Java-maven/) |
 | Go/modules | published_install_verified | [virtual-network-adapter-sdk](https://pkg.go.dev/github.com/titanfyre/Virtual-Network-Adapter-SDK/Virtual-Network-Adapter-SDK-Go-modules@v1.0.0) [Source](Virtual-Network-Adapter-SDK-Go-modules/) |
