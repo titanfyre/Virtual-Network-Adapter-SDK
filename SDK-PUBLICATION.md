@@ -6,12 +6,12 @@ Current source layout and registry coverage. A GitHub download is distinct from 
 | --- | --- | --- |
 | CPP/vcpkg | published_custom_registry | virtual-network-adapter-sdk |
 | CPP/conan | published_custom_source_index | [virtual-network-adapter-sdk](https://github.com/TitanCSA/sdk-packages/tree/089bc73095aa8eda89bacbe10d0b9e58394b0207/conan-index) [Source](packaging/native/) |
-| CPP/nuget | account_email_confirmed_requires_matching_trusted_publishing_policy | Virtual-Network-Adapter-SDK.Native |
-| NET/nuget | built_verified_requires_trusted_publishing_policy | VirtualNetworkAdapterSDK.SDK [Source](Virtual-Network-Adapter-SDK-NET-nuget/) |
+| CPP/nuget | published_payload_verified | [Virtual-Network-Adapter-SDK.Native](https://www.nuget.org/packages/Virtual-Network-Adapter-SDK.Native/0.1.1) |
+| NET/nuget | published_payload_verified | [VirtualNetworkAdapterSDK.SDK](https://www.nuget.org/packages/VirtualNetworkAdapterSDK.SDK/1.0.0) |
 | Python/pypi | built_fixture_and_production_verified | virtual-network-adapter-sdk [Source](Virtual-Network-Adapter-SDK-Python-pypi/) |
 | Python/conda-forge | custom_channel_install_verified_requires_conda_forge_review | [virtual-network-adapter-sdk](https://raw.githubusercontent.com/TitanCSA/sdk-packages/089bc73095aa8eda89bacbe10d0b9e58394b0207/conda-channel) [Source](packaging/conda/) |
 | Rust/cargo | published_install_verified | [virtual-network-adapter-sdk](https://crates.io/crates/virtual-network-adapter-sdk) [Source](Virtual-Network-Adapter-SDK-Rust-cargo/) |
-| JavaScript/npm | registry_publication_requires_action | [virtual-network-adapter-sdk](https://www.npmjs.com/package/virtual-network-adapter-sdk) [Source](Virtual-Network-Adapter-SDK-JavaScript-npm/) |
+| JavaScript/npm | stopped_before_submission | virtual-network-adapter-sdk [Source](Virtual-Network-Adapter-SDK-JavaScript-npm/) |
 | Java/maven | published_install_verified | [virtual-network-adapter-sdk](https://central.sonatype.com/artifact/io.github.titancsa/virtual-network-adapter-sdk/1.0.0) [Source](Virtual-Network-Adapter-SDK-Java-maven/) |
 | Java/jitpack | published_install_verified | [virtual-network-adapter-sdk](https://jitpack.io/#titanfyre/Virtual-Network-Adapter-SDK/java-sdk-v1.0.0) [Source](Virtual-Network-Adapter-SDK-Java-maven/) |
 | Go/modules | published_install_verified | [virtual-network-adapter-sdk](https://pkg.go.dev/github.com/titanfyre/Virtual-Network-Adapter-SDK/Virtual-Network-Adapter-SDK-Go-modules@v1.0.0) [Source](Virtual-Network-Adapter-SDK-Go-modules/) |
