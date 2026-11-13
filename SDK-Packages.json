@@ -68,6 +68,14 @@
       "distribution": "Documented native SDK; registry receipt tracked independently"
     },
     {
+      "directory": "Virtual-Network-Adapter-SDK-JavaScript-npm",
+      "language": "JavaScript",
+      "registry": "npm",
+      "name": "virtual-network-adapter-sdk",
+      "version": "1.0.0",
+      "distribution": "Documented native SDK; registry receipt tracked independently"
+    },
+    {
       "directory": "Virtual-Network-Adapter-SDK-NET-nuget",
       "language": "NET",
       "registry": "nuget",
