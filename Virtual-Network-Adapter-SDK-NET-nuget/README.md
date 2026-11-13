@@ -1,8 +1,6 @@
 # Virtual-Network-Adapter-SDK .NET8 SDK
 
-Package ID `VirtualNetworkAdapterSDK.SDK`. NuGet upload remains on hold at owner request.
-
-```csharp
+Package ID `VirtualNetworkAdapterSDK.SDK`. ```csharp
 using var client=new TitanCSA.Products.VirtualNetworkAdapterSDK.Client();
 string statusJson=client.Call("status", "{}");
 ```
