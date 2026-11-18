@@ -111,7 +111,7 @@ Les sources, licences, guides API et exemples sont regroupes dans [le depot SDK 
 | PowerShell Gallery | `VirtualNetworkAdapterSDK` | `Install-Module VirtualNetworkAdapterSDK -RequiredVersion 1.0.0 -Scope CurrentUser` |
 | pub.dev | `virtual_network_adapter_sdk` | Commande prevue apres publication : `dart pub add virtual_network_adapter_sdk:1.0.0` |
 | RubyGems | `virtual-network-adapter-sdk` | `gem install virtual-network-adapter-sdk -v 1.0.0` |
-| Packagist | `titancsa/virtual-network-adapter-sdk` | Commande prevue apres publication : `composer require titancsa/virtual-network-adapter-sdk:1.0.0` |
+| Packagist | `titancsa/virtual-network-adapter-sdk` | `composer require titancsa/virtual-network-adapter-sdk:1.0.0` |
 
 Pour vcpkg et Conan, configure d abord le registre TitanCSA avec [le guide complet](https://github.com/TitanCSA/sdk-packages/tree/main/projects/Virtual-Network-Adapter-SDK/README.md). Le guide explique aussi Maven/Gradle, les prerequis et le chargement des DLL. Les pilotes/applications du produit sont installes separement. Les commandes marquees prevues ne sont pas encore disponibles.
 
