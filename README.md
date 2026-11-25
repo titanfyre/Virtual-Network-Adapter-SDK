@@ -3,7 +3,11 @@
 <!-- simple-start:start -->
 Give your Windows app a virtual network adapter.
 
-**Start here.** Follow the setup guide and try the included example before writing your own.
+[First steps](#first-steps) · [Develop](#sdk-and-packages) · [Maintain](https://github.com/TitanCSA/sdk-packages/blob/main/CONTRIBUTING.md)
+
+## First steps
+
+Follow the setup guide and try the included example before writing your own.
 <!-- simple-start:end -->
 
 <!-- full-version-contact:start -->
@@ -103,32 +107,11 @@ Technical references: [NDIS miniport drivers](https://learn.microsoft.com/en-us/
 Use only on systems you own or administer with authorization, and comply with applicable law and third-party terms. The software is intended for legitimate integration, testing and network application development. To the extent permitted by law, the author is not responsible for misuse, unlawful activity or resulting damage. It is supplied without warranty; mandatory statutory rights remain unaffected. See [MIT license](LICENSE) for public source terms and the accompanying separate terms for driver binaries.
 
 <!-- central-sdk-packages:start -->
-## Paquets et installation
+<a name="paquets-et-installation"></a>
 
-Les sources, licences, guides API et exemples sont regroupes dans [le depot SDK dedie](https://github.com/TitanCSA/sdk-packages/tree/main/projects/Virtual-Network-Adapter-SDK). Choisis le paquet a installer puis execute sa commande dans son dossier.
+## SDK and packages
 
-| Registre | Paquet | Installation / utilisation |
-| --- | --- | --- |
-| vcpkg | `virtual-network-adapter-sdk` | `vcpkg install virtual-network-adapter-sdk:x64-windows` |
-| Conan | `virtual-network-adapter-sdk` | `conan install --requires=virtual-network-adapter-sdk/0.1.1 -r titancsa --build=missing -s compiler.cppstd=17` |
-| NuGet | `Virtual-Network-Adapter-SDK.Native` | `Install-Package Virtual-Network-Adapter-SDK.Native -Version 0.1.1` |
-| NuGet | `VirtualNetworkAdapterSDK.SDK` | `dotnet add package VirtualNetworkAdapterSDK.SDK --version 1.0.0` |
-| PyPI | `virtual-network-adapter-sdk` | Commande prevue apres publication : `python -m pip install virtual-network-adapter-sdk==1.0.0` |
-| Conda | `virtual-network-adapter-sdk` | `conda install --override-channels -c https://raw.githubusercontent.com/TitanCSA/sdk-packages/089bc73095aa8eda89bacbe10d0b9e58394b0207/conda-channel -c conda-forge virtual-network-adapter-sdk` (canal TitanCSA) |
-| crates.io | `virtual-network-adapter-sdk` | `cargo add virtual-network-adapter-sdk@1.0.0` |
-| npm | `virtual-network-adapter-sdk` | Commande prevue apres publication : `npm install virtual-network-adapter-sdk@1.0.0` |
-| Maven Central | `io.github.titancsa:virtual-network-adapter-sdk` | `io.github.titancsa:virtual-network-adapter-sdk:1.0.0 (pom.xml / Gradle)` |
-| JitPack | `com.github.titanfyre:Virtual-Network-Adapter-SDK` | `com.github.titanfyre:Virtual-Network-Adapter-SDK:java-sdk-v1.0.0 (avec le depot JitPack)` |
-| Go Modules | `github.com/titanfyre/Virtual-Network-Adapter-SDK/Virtual-Network-Adapter-SDK-Go-modules` | `go get github.com/titanfyre/Virtual-Network-Adapter-SDK/Virtual-Network-Adapter-SDK-Go-modules@v1.0.0` |
-| pkg.go.dev | `github.com/titanfyre/Virtual-Network-Adapter-SDK/Virtual-Network-Adapter-SDK-Go-modules` | `Documentation : https://pkg.go.dev/github.com/titanfyre/Virtual-Network-Adapter-SDK/Virtual-Network-Adapter-SDK-Go-modules@v1.0.0` |
-| PowerShell Gallery | `VirtualNetworkAdapterSDK` | `Install-Module VirtualNetworkAdapterSDK -RequiredVersion 1.0.0 -Scope CurrentUser` |
-| pub.dev | `virtual_network_adapter_sdk` | Commande prevue apres publication : `dart pub add virtual_network_adapter_sdk:1.0.0` |
-| RubyGems | `virtual-network-adapter-sdk` | `gem install virtual-network-adapter-sdk -v 1.0.0` |
-| Packagist | `titancsa/virtual-network-adapter-sdk` | `composer require titancsa/virtual-network-adapter-sdk:1.0.0` |
-
-Pour vcpkg et Conan, configure d abord le registre TitanCSA avec [le guide complet](https://github.com/TitanCSA/sdk-packages/tree/main/projects/Virtual-Network-Adapter-SDK/README.md). Le guide explique aussi Maven/Gradle, les prerequis et le chargement des DLL. Les pilotes/applications du produit sont installes separement. Les commandes marquees prevues ne sont pas encore disponibles.
-
-Les anciens imports Go et versions JitPack gardent leurs tags. Pour les anciennes archives SDK, utilise [les liens de remplacement](https://github.com/TitanCSA/sdk-packages/blob/main/release-assets/URL-MIGRATION.json).
+Choose a language in the [SDK and package guide](https://github.com/TitanCSA/sdk-packages/tree/main/projects/Virtual-Network-Adapter-SDK#readme) for exact install commands and examples. If your example requires a driver or app, install it separately.
 <!-- central-sdk-packages:end -->
 
 ## Commercial integration and support
