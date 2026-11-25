@@ -1,13 +1,16 @@
 # Virtual Network Adapter SDK
 
+<!-- simple-start:start -->
+Give your Windows app a virtual network adapter.
+
+**Start here.** Follow the setup guide and try the included example before writing your own.
+<!-- simple-start:end -->
+
 <!-- full-version-contact:start -->
 > [!IMPORTANT]
-> **Get the version without the one-hour demo limit**
+> **Version without the one-hour demo limit**
 >
-> **Discord · `titancsa`**. Open [Discord](https://discord.com/app), choose **Friends → Add Friend**, enter **`titancsa`** and send a message.
-> Send the project name and ask for its full version. TitanCSA will share the purchase details privately.
->
-> **FR · Version sans la limite d’une heure.** Ajoute **`titancsa`** sur Discord et envoie le nom du projet. Le lien d’achat est communiqué en privé.
+> In [Discord](https://discord.com/app), choose **Add Friend** and enter **`titancsa`**. Send the project name. Purchase details are sent privately.
 <!-- full-version-contact:end -->
 
 **A Windows kernel virtual Ethernet adapter with a small C++ API for application-defined networking.**
@@ -129,5 +132,3 @@ Les anciens imports Go et versions JitPack gardent leurs tags. Pour les ancienne
 <!-- central-sdk-packages:end -->
 
 ## Commercial integration and support
-
-
